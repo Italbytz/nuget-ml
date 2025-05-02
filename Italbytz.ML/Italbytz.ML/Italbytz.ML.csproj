@@ -20,4 +20,8 @@
     <ItemGroup>
         <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.ML" Version="4.0.1" />
+        <PackageReference Include="Italbytz.Ports.Algorithms.AI" Version="9.1.0"/>
+    </ItemGroup>
 </Project>
