@@ -1,6 +1,4 @@
-using Italbytz.ML.ModelBuilder.Configuration;
-
-namespace logicGP.Tests.Util.ML.ModelBuilder.Configuration;
+namespace Italbytz.ML.ModelBuilder.Configuration;
 
 public interface ITrainResult
 {

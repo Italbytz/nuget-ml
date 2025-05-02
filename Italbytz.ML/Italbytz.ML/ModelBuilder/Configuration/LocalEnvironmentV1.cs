@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
-using Italbytz.ML.ModelBuilder.Configuration;
 
-namespace logicGP.Tests.Util.ML.ModelBuilder.Configuration;
+namespace Italbytz.ML.ModelBuilder.Configuration;
 
 public class LocalEnvironmentV1 : MBConfig, IEnvironment
 {

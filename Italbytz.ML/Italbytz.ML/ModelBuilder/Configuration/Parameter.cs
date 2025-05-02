@@ -1,4 +1,4 @@
-namespace logicGP.Tests.Util.ML.ModelBuilder.Configuration;
+namespace Italbytz.ML.ModelBuilder.Configuration;
 
 public class Parameter
 {
