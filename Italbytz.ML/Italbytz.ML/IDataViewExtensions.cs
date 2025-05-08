@@ -226,6 +226,43 @@ public static class IDataViewExtensions
     }
 
     /// <summary>
+    ///     Gets a structured excerpt of data from an <see cref="IDataView" />.
+    /// </summary>
+    /// <param name="dataView">The data view to extract data from.</param>
+    /// <param name="labelColumnName">The name of the label column. Default is "Label".</param>
+    /// <param name="featureColumnName">
+    ///     The name of the features column. Default is
+    ///     "Features".
+    /// </param>
+    /// <returns>
+    ///     An <see cref="IDataExcerpt" /> containing features, feature names, and
+    ///     labels.
+    /// </returns>
+    /// <remarks>
+    ///     This method extracts feature vectors, their corresponding names, and labels
+    ///     from an <see cref="IDataView" />.
+    ///     It uses <see cref="GetFeaturesSlotNames" /> to retrieve feature names and
+    ///     the <see cref="GetColumn{T}" />
+    ///     method to retrieve feature vectors and labels. The extracted data is
+    ///     packaged into an
+    ///     <see cref="IDataExcerpt" /> object for easier access and manipulation.
+    /// </remarks>
+    public static IDataExcerpt GetDataExcerpt(
+        this IDataView dataView,
+        string labelColumnName = DefaultColumnNames.Label,
+        string featureColumnName = DefaultColumnNames.Features)
+    {
+        var featureNames = dataView.GetFeaturesSlotNames();
+        var features = dataView
+            .GetColumn<float[]>(featureColumnName)
+            .ToList();
+        var labels = dataView
+            .GetColumn<uint>(labelColumnName)
+            .ToList();
+        return new DataExcerpt(features, featureNames, labels);
+    }
+
+    /// <summary>
     ///     Gets the entries in a specified column of an <see cref="IDataView" /> as
     ///     strings.
     /// </summary>
@@ -265,6 +302,4 @@ public static class IDataViewExtensions
         };
         return dataColumn;
     }
-
-    
 }
