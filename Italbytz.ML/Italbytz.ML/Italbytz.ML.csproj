@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageVersion>9.2.0</PackageVersion>
+        <PackageVersion>9.2.1</PackageVersion>
         <Authors>Robin Nunkesser</Authors>
         <PackageProjectUrl>https://github.com/Italbytz/nuget-ml</PackageProjectUrl>
         <Description>Helper classes for Microsoft.ML.</Description>
@@ -21,7 +21,7 @@
         <None Include="../../docfx/docs/introduction.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
     <ItemGroup>
-      <PackageReference Include="Microsoft.ML" Version="4.0.1" />
+        <PackageReference Include="Microsoft.ML" Version="4.0.1"/>
         <PackageReference Include="Italbytz.Ports.Algorithms.AI" Version="9.1.0"/>
     </ItemGroup>
 </Project>
