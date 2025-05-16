@@ -134,7 +134,7 @@ public class BinaryClassificationInput : CustomMappingInput
 }
 
 /// <inheritdoc />
-public class MulticlassClassification : CustomMappingInput
+public class MulticlassClassificationInput : CustomMappingInput
 {
 }
 
@@ -218,212 +218,122 @@ public class
     public float Probability { get; set; }
 }
 
-/// <inheritdoc />
-public class
-    TernaryClassificationOutput :
+public class MulticlassClassificationOutput :
     IMulticlassClassificationOutput
 {
     /// <inheritdoc />
     public uint PredictedLabel { get; set; }
 
     /// <inheritdoc />
-    [VectorType(3)]
-    public VBuffer<float> Score { get; set; }
+    [VectorType(2)]
+    public virtual VBuffer<float> Score { get; set; }
 
     /// <inheritdoc />
     public VBuffer<float> Probability { get; set; }
+}
+
+/// <inheritdoc />
+public class
+    TernaryClassificationOutput :
+    MulticlassClassificationOutput
+{
+    [VectorType(3)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     QuaternaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(4)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(4)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     QuinaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(5)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(5)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     SenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(6)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(6)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     SeptenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(7)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(7)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     OctonaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(8)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(8)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     NonaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(9)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(9)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     DenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(10)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(10)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     UndenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(11)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(11)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     DuodenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(12)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(12)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     TridenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(13)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(13)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     TetradenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(14)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(14)] public override VBuffer<float> Score { get; set; }
 }
 
 /// <inheritdoc />
 public class
     PentadenaryClassificationOutput :
-    IMulticlassClassificationOutput
+    MulticlassClassificationOutput
 {
-    /// <inheritdoc />
-    public uint PredictedLabel { get; set; }
-
-    /// <inheritdoc />
-    [VectorType(15)]
-    public VBuffer<float> Score { get; set; }
-
-    /// <inheritdoc />
-    public VBuffer<float> Probability { get; set; }
+    [VectorType(15)] public override VBuffer<float> Score { get; set; }
 }
 
 #endregion
