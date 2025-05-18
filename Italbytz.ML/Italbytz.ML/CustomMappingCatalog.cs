@@ -138,6 +138,11 @@ public class MulticlassClassificationInput : CustomMappingInput
 {
 }
 
+/// <inheritdoc />
+public class RegressionInput : CustomMappingInput
+{
+}
+
 #endregion
 
 #region Output
