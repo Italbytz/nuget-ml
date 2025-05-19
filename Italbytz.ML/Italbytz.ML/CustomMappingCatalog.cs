@@ -129,12 +129,7 @@ public class CustomMappingInput : ICustomMappingInput
 }
 
 /// <inheritdoc />
-public class BinaryClassificationInput : CustomMappingInput
-{
-}
-
-/// <inheritdoc />
-public class MulticlassClassificationInput : CustomMappingInput
+public class ClassificationInput : CustomMappingInput
 {
 }
 
