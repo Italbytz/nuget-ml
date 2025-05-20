@@ -30,7 +30,7 @@ public abstract class
     ///     by derived classes to perform any necessary preprocessing or setup.
     /// </summary>
     /// <param name="input">The input data view to be prepared.</param>
-    protected void PrepareForFit(IDataView input)
+    protected virtual void PrepareForFit(IDataView input)
     {
     }
 
