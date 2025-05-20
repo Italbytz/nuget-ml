@@ -30,7 +30,9 @@ public abstract class
     ///     by derived classes to perform any necessary preprocessing or setup.
     /// </summary>
     /// <param name="input">The input data view to be prepared.</param>
-    protected abstract void PrepareForFit(IDataView input);
+    protected void PrepareForFit(IDataView input)
+    {
+    }
 
     /// <summary>
     ///     Gets the custom mapping estimator used for transforming the input data
@@ -41,6 +43,25 @@ public abstract class
     ///     A <see cref="CustomMappingEstimator{TInput, TOutput}" /> instance
     ///     that defines the mapping logic.
     /// </returns>
-    protected abstract CustomMappingEstimator<TInput, TOutput>
-        GetCustomMappingEstimator();
+    private CustomMappingEstimator<TInput, TOutput>
+        GetCustomMappingEstimator()
+    {
+        var mlContext = ThreadSafeMLContext.LocalMLContext;
+        return mlContext.Transforms
+            .CustomMapping(
+                GetMapping(), null);
+    }
+
+    private Action<TInput, TOutput> GetMapping()
+    {
+        return Map;
+    }
+
+    /// <summary>
+    ///     Mapping method that defines how to transform the input data into the
+    ///     output data.
+    /// </summary>
+    /// <param name="input">Input data</param>
+    /// <param name="output">Output data</param>
+    protected abstract void Map(TInput input, TOutput output);
 }
