@@ -18,4 +18,6 @@ public interface ITrainingConfiguration
     public ITrainResult? TrainResult { get; set; }
 
     public string? TrainingConfigurationFolder { get; set; }
+
+    public string SerializeToJson(bool writeIndented = false);
 }

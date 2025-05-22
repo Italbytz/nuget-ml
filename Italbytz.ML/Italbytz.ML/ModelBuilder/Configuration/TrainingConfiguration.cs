@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Italbytz.ML.ModelBuilder.Configuration;
@@ -14,7 +15,7 @@ public class TrainingConfiguration : MBConfig, ITrainingConfiguration
 
     [JsonIgnore]
     public virtual AutoMLType? AutoMLType { get; set; } =
-        Italbytz.ML.ModelBuilder.Configuration.AutoMLType.Octopus;
+        Configuration.AutoMLType.Octopus;
 
     [JsonIgnore] public virtual ITrainResult? TrainResult { get; set; }
 
@@ -22,4 +23,17 @@ public class TrainingConfiguration : MBConfig, ITrainingConfiguration
 
     [JsonIgnore]
     public virtual string? TrainingConfigurationFolder { get; set; }
+
+    public string SerializeToJson(bool writeIndented = false)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = writeIndented,
+            Converters =
+            {
+                new JsonStringEnumConverter()
+            }
+        };
+        return JsonSerializer.Serialize(this, options);
+    }
 }
