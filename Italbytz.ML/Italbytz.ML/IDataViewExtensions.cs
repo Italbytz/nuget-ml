@@ -44,7 +44,12 @@ public static class IDataViewExtensions
         dt = new DataTable();
         var preview = dataView.Preview();
         dt.Columns.AddRange(preview.Schema
-            .Select(x => new DataColumn(x.Name)).ToArray());
+            .Select(x =>
+            {
+                var column = new DataColumn(x.Name);
+                column.DataType = x.Type.RawType;
+                return column;
+            }).ToArray());
         foreach (var row in preview.RowView)
         {
             var r = dt.NewRow();
@@ -91,6 +96,164 @@ public static class IDataViewExtensions
     ///     The method uses a comma (',') as the separator character.
     /// </remarks>
     public static void WriteToCsv(
+        this IDataView dataView,
+        string filePath
+    )
+    {
+        var sb = new StringBuilder();
+        var preview = dataView.Preview();
+        var header = string.Join(',', preview.Schema.Select(x =>
+        {
+            if (x.Type is not VectorDataViewType vectorType) return x.Name;
+            if (!vectorType.IsKnownSize)
+                throw new ArgumentException(
+                    "Data contains vector of unknown sizes are supported");
+
+            var columns = new string[vectorType.Size];
+            for (var i = 1; i < vectorType.Size + 1; i++)
+                columns[i - 1] =
+                    x.Name + i.ToString(CultureInfo.InvariantCulture);
+            return string.Join(",", columns);
+        }));
+        sb.AppendLine(header);
+        foreach (var row in preview.RowView)
+        {
+            var columns = new List<string>();
+            foreach (var col in row.Values)
+            {
+                var entry = "";
+                switch (col.Value)
+                {
+                    case VBuffer<float> vBuffer:
+                    {
+                        var values = vBuffer.GetValues();
+                        entry = string.Join(",",
+                            values.ToArray().Select(v =>
+                                v.ToString(CultureInfo.InvariantCulture)));
+                        break;
+                    }
+                    case VBuffer<uint> vBufferUInt:
+                    {
+                        var values = vBufferUInt.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<string> vBufferString:
+                    {
+                        var values = vBufferString.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<char> vBufferChar:
+                    {
+                        var values = vBufferChar.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<int> vBufferInt:
+                    {
+                        var values = vBufferInt.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<double> vBufferDouble:
+                    {
+                        var values = vBufferDouble.GetValues();
+                        entry = string.Join(",",
+                            values.ToArray().Select(v =>
+                                v.ToString(CultureInfo.InvariantCulture)));
+                        break;
+                    }
+                    case VBuffer<bool> vBufferBool:
+                    {
+                        var values = vBufferBool.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<byte> vBufferByte:
+                    {
+                        var values = vBufferByte.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<long> vBufferLong:
+                    {
+                        var values = vBufferLong.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<ulong> vBufferULong:
+                    {
+                        var values = vBufferULong.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<short> vBufferShort:
+                    {
+                        var values = vBufferShort.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case VBuffer<sbyte> vBufferSByte:
+                    {
+                        var values = vBufferSByte.GetValues();
+                        entry = string.Join(",", values.ToArray());
+                        break;
+                    }
+                    case double doubleValue:
+                        entry = doubleValue.ToString(
+                            CultureInfo.InvariantCulture);
+                        break;
+                    case float floatValue:
+                        entry = floatValue.ToString(
+                            CultureInfo.InvariantCulture);
+                        break;
+                    case int intValue:
+                        entry = intValue.ToString();
+                        break;
+                    case uint uintValue:
+                        entry = uintValue.ToString();
+                        break;
+                    case long longValue:
+                        entry = longValue.ToString();
+                        break;
+                    case ulong ulongValue:
+                        entry = ulongValue.ToString();
+                        break;
+                    case string stringValue:
+                        entry = stringValue;
+                        break;
+                    case char charValue:
+                        entry = charValue.ToString();
+                        break;
+                    case bool boolValue:
+                        entry = boolValue.ToString();
+                        break;
+                    case byte byteValue:
+                        entry = byteValue.ToString();
+                        break;
+                    case short shortValue:
+                        entry = shortValue.ToString();
+                        break;
+                    case sbyte sbyteValue:
+                        entry = sbyteValue.ToString();
+                        break;
+                    default:
+                        entry = col.Value.ToString();
+                        break;
+                }
+
+                columns.Add(entry);
+            }
+
+            var column = string.Join(',', columns);
+            sb.AppendLine(column);
+        }
+
+        File.WriteAllText(filePath, sb.ToString());
+    }
+
+    public static void OldWriteToCsv(
         this IDataView dataView,
         string filePath
     )
