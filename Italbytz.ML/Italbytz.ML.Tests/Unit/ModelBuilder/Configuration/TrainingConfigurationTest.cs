@@ -57,5 +57,6 @@ public class TrainingConfigurationTest
         };
         var json = config.SerializeToJson();
         Assert.IsTrue(json.Contains("Trainer1"));
+        Assert.IsFalse(json.Contains("null"));
     }
 }

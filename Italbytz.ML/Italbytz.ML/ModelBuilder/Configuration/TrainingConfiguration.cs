@@ -32,7 +32,8 @@ public class TrainingConfiguration : MBConfig, ITrainingConfiguration
             Converters =
             {
                 new JsonStringEnumConverter()
-            }
+            },
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
         return JsonSerializer.Serialize(this, options);
     }
