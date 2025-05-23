@@ -3,6 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Italbytz.ML.Data;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
@@ -58,6 +59,100 @@ public static class IDataViewExtensions
         }
 
         return dt;
+    }
+
+    /// <summary>
+    ///     Splits an <see cref="IDataView" /> into training, validation, and test
+    ///     datasets,
+    ///     saves them as CSV files, and returns the file names.
+    /// </summary>
+    /// <param name="saveFolderPath">The folder path where the CSV files will be saved.</param>
+    /// <param name="filePrefix">The prefix for the generated CSV file names.</param>
+    /// <param name="samplingKeyColumnName">
+    ///     The name of the column to use for sampling. Default is null.
+    /// </param>
+    /// <param name="validateFraction">
+    ///     The fraction of the data to use for validation. Default is 0.15.
+    /// </param>
+    /// <param name="testFraction">
+    ///     The fraction of the data to use for testing. Default is 0.15.
+    /// </param>
+    /// <param name="seeds">
+    ///     An array of seeds for random number generation. Default is null, which uses
+    ///     a single standard seed.
+    /// </param>
+    /// <returns>
+    ///     An enumerable of <see cref="TrainValidateTestFileNames" /> containing the
+    ///     file names
+    ///     of the generated training, validation, and test CSV files.
+    /// </returns>
+    /// <remarks>
+    ///     This method uses the <see cref="MLContext.Data.TrainTestSplit" /> method to
+    ///     split
+    ///     the data into training, validation, and test datasets. The datasets are
+    ///     saved as
+    ///     CSV files in the specified folder with the given file prefix. If multiple
+    ///     seeds
+    ///     are provided, the method generates multiple sets of files, one for each
+    ///     seed.
+    /// </remarks>
+    public static IEnumerable<TrainValidateTestFileNames>
+        GenerateTrainValidateTestCsvs(
+            this IDataView dataView,
+            string saveFolderPath,
+            string filePrefix,
+            string? samplingKeyColumnName = null,
+            double validateFraction = 0.15,
+            double testFraction = 0.15,
+            int[]? seeds = null
+        )
+    {
+        var mlContext = new MLContext();
+        var generatedFiles = new List<TrainValidateTestFileNames>();
+        seeds ??= [int.MinValue];
+        foreach (var seed in seeds)
+        {
+            int? realSeed = seed == int.MinValue
+                ? null
+                : seed;
+            var validateAndTestFraction = validateFraction + testFraction;
+            var trainValidateTestDataSplit = mlContext.Data.TrainTestSplit(
+                dataView,
+                validateAndTestFraction, samplingKeyColumnName,
+                realSeed);
+            var trainDataSet = trainValidateTestDataSplit.TrainSet;
+            var validateTestDataSet = trainValidateTestDataSplit.TestSet;
+            var validateInTestFraction = validateFraction /
+                                         (validateFraction + testFraction);
+            var validateTestDataSplit = mlContext.Data.TrainTestSplit(
+                validateTestDataSet, validateInTestFraction,
+                samplingKeyColumnName, realSeed);
+
+            var validateDataSet = validateTestDataSplit.TestSet;
+            var testDataSet = validateTestDataSplit.TrainSet;
+
+            var seedString = seed == int.MinValue
+                ? string.Empty
+                : "_seed" + seed.ToString(CultureInfo.InvariantCulture);
+            var fileNames =
+                new TrainValidateTestFileNames
+                {
+                    TrainFileName = filePrefix + "_train" + seedString + ".csv",
+                    ValidateFileName =
+                        filePrefix + "_validate" + seedString + ".csv",
+                    TestFileName = filePrefix + "_test" + seedString + ".csv"
+                };
+
+            trainDataSet.WriteToCsv(
+                Path.Combine(saveFolderPath, fileNames.TrainFileName));
+            validateDataSet.WriteToCsv(
+                Path.Combine(saveFolderPath, fileNames.ValidateFileName));
+            testDataSet.WriteToCsv(
+                Path.Combine(saveFolderPath, fileNames.TestFileName));
+            generatedFiles.Add(fileNames);
+        }
+
+        return generatedFiles;
     }
 
     /// <summary>
