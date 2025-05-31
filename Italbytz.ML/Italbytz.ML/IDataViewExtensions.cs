@@ -115,21 +115,21 @@ public static class IDataViewExtensions
             int? realSeed = seed == int.MinValue
                 ? null
                 : seed;
-            var validateAndTestFraction = validateFraction + testFraction;
-            var trainValidateTestDataSplit = mlContext.Data.TrainTestSplit(
+            //var validateAndTestFraction = validateFraction + testFraction;
+            var trainTestDataSplit = mlContext.Data.TrainTestSplit(
                 dataView,
-                validateAndTestFraction, samplingKeyColumnName,
+                testFraction, samplingKeyColumnName,
                 realSeed);
-            var trainDataSet = trainValidateTestDataSplit.TrainSet;
-            var validateTestDataSet = trainValidateTestDataSplit.TestSet;
-            var validateInTestFraction = validateFraction /
-                                         (validateFraction + testFraction);
-            var validateTestDataSplit = mlContext.Data.TrainTestSplit(
-                validateTestDataSet, validateInTestFraction,
+            var trainValidateDataSet = trainTestDataSplit.TrainSet;
+            var testDataSet = trainTestDataSplit.TestSet;
+            var validateInTrainFraction = validateFraction /
+                                          (1 - testFraction);
+            var validateTrainDataSplit = mlContext.Data.TrainTestSplit(
+                trainValidateDataSet, validateInTrainFraction,
                 samplingKeyColumnName, realSeed);
 
-            var validateDataSet = validateTestDataSplit.TestSet;
-            var testDataSet = validateTestDataSplit.TrainSet;
+            var validateDataSet = validateTrainDataSplit.TestSet;
+            var trainDataSet = validateTrainDataSplit.TrainSet;
 
             var seedString = seed == int.MinValue
                 ? string.Empty
@@ -140,6 +140,8 @@ public static class IDataViewExtensions
                     TrainFileName = filePrefix + "_train" + seedString + ".csv",
                     ValidateFileName =
                         filePrefix + "_validate" + seedString + ".csv",
+                    TrainValidateFileName = filePrefix + "_train_validate" +
+                                            seedString + ".csv",
                     TestFileName = filePrefix + "_test" + seedString + ".csv"
                 };
 
@@ -147,6 +149,8 @@ public static class IDataViewExtensions
                 Path.Combine(saveFolderPath, fileNames.TrainFileName));
             validateDataSet.WriteToCsv(
                 Path.Combine(saveFolderPath, fileNames.ValidateFileName));
+            trainValidateDataSet.WriteToCsv(
+                Path.Combine(saveFolderPath, fileNames.TrainValidateFileName));
             testDataSet.WriteToCsv(
                 Path.Combine(saveFolderPath, fileNames.TestFileName));
             generatedFiles.Add(fileNames);

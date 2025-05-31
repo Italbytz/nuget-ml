@@ -128,7 +128,7 @@ public class IDataViewExtensionsTest
     {
         var folder = Path.GetTempPath();
         var files = _data.GenerateTrainValidateTestCsvs(folder, "HousingData",
-            validateFraction: 0.1, testFraction: 0.1);
+            validateFraction: 0.2, testFraction: 0.2);
         Assert.IsNotNull(files);
         Assert.AreEqual(1, files.Count());
         Assert.IsTrue(
@@ -137,6 +137,9 @@ public class IDataViewExtensionsTest
             File.Exists(Path.Combine(folder, files.First().ValidateFileName)));
         Assert.IsTrue(
             File.Exists(Path.Combine(folder, files.First().TestFileName)));
+        Assert.IsTrue(
+            File.Exists(Path.Combine(folder,
+                files.First().TrainValidateFileName)));
     }
 
     [TestMethod]

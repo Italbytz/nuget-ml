@@ -16,6 +16,11 @@ public record TrainValidateTestFileNames
     public required string ValidateFileName { get; set; }
 
     /// <summary>
+    ///     Gets or sets the file name for the training and validation dataset.
+    /// </summary>
+    public required string TrainValidateFileName { get; set; }
+
+    /// <summary>
     ///     Gets or sets the file name for the test dataset.
     /// </summary>
     public required string TestFileName { get; set; }
