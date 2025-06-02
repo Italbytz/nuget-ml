@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Italbytz.ML.ModelBuilder.Configuration;
 
+[JsonDerivedType(typeof(RegressionTrainingOptionV2))]
 [JsonDerivedType(typeof(ClassificationTrainingOptionV2))]
 public interface ITrainingOption
 {
