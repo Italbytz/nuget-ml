@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageVersion>9.8.4</PackageVersion>
+        <PackageVersion>9.9.0</PackageVersion>
         <Authors>Robin Nunkesser</Authors>
         <PackageProjectUrl>https://github.com/Italbytz/nuget-ml</PackageProjectUrl>
         <Description>Helper classes for Microsoft.ML.</Description>
