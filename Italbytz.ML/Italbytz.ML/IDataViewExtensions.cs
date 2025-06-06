@@ -200,7 +200,7 @@ public static class IDataViewExtensions
     )
     {
         var sb = new StringBuilder();
-        var preview = dataView.Preview();
+        var preview = dataView.Preview(int.MaxValue);
         var header = string.Join(',', preview.Schema.Select(x =>
         {
             if (x.Type is not VectorDataViewType vectorType) return x.Name;

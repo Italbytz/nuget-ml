@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <PackageVersion>9.9.0</PackageVersion>
+        <PackageVersion>9.10.0</PackageVersion>
         <Authors>Robin Nunkesser</Authors>
         <PackageProjectUrl>https://github.com/Italbytz/nuget-ml</PackageProjectUrl>
         <Description>Helper classes for Microsoft.ML.</Description>
@@ -22,5 +22,6 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.ML" Version="4.0.1"/>
+        <PackageReference Include="Microsoft.ML.FastTree" Version="4.0.1"/>
     </ItemGroup>
 </Project>
