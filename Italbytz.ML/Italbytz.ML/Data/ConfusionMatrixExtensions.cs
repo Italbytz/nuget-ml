@@ -60,8 +60,8 @@ public static class ConfusionMatrixExtensions
             {
                 for (var i = 0; i < count; i++)
                 {
-                    actual.Add(columnIndex);
-                    predicted.Add(rowIndex);
+                    actual.Add(rowIndex);
+                    predicted.Add(columnIndex);
                 }
 
                 columnIndex++;
