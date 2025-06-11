@@ -32,6 +32,9 @@ public class ExplainerTest
             "class");
         var pfi = explainer.GetPermutationFeatureImportanceTable(
             Metric.MacroAccuracy);
-        Console.WriteLine(pfi);
+        Assert.IsNotNull(pfi);
+        Assert.IsTrue(pfi.Contains("Feature, Importance"));
+        Assert.IsTrue(pfi.Contains("petal length"));
+        Assert.IsTrue(pfi.Contains("petal width"));
     }
 }
