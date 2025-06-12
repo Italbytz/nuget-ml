@@ -1,9 +1,10 @@
 using System.Collections.Immutable;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using Italbytz.ML.Data;
+using Italbytz.ML.Helper;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
@@ -21,6 +22,74 @@ namespace Italbytz.ML;
 /// </remarks>
 public static class IDataViewExtensions
 {
+    public static List<Feature> GetFeatures<ModelInput>(
+        this IDataView dataView,
+        string labelColumnName = DefaultColumnNames.Label)
+        where ModelInput : class, new()
+    {
+        var result = new List<Feature>();
+        var mlContext = ThreadSafeMLContext.LocalMLContext;
+        var dataEnumerable =
+            mlContext.Data.CreateEnumerable<ModelInput>(dataView, true);
+
+        var schema = dataView.Schema;
+        var firstRow = dataEnumerable.First();
+        const BindingFlags flags = BindingFlags.Public |
+                                   BindingFlags.NonPublic |
+                                   BindingFlags.Instance;
+        var modelProperties = ReflectionHelper.GetPropertyInfo(firstRow, flags);
+        foreach (var propertyInfo in modelProperties)
+        {
+            var propertyName = propertyInfo.Name;
+            var columnName = propertyInfo.Name;
+            var columnIndex = 0;
+            var customAttributes = propertyInfo.GetCustomAttributes(true);
+            foreach (var customAttribute in customAttributes)
+                switch (customAttribute)
+                {
+                    case ColumnNameAttribute columnNameAttribute:
+                        var namePropertyInfo = columnNameAttribute.GetType()
+                            .GetProperty("Name", flags);
+                        if (namePropertyInfo != null)
+                            columnName =
+                                (string)namePropertyInfo.GetValue(
+                                    columnNameAttribute)!;
+                        break;
+                    case LoadColumnAttribute
+                        loadColumnAttribute:
+                        var sourcesFieldInfo = loadColumnAttribute.GetType()
+                            .GetField("Sources", flags);
+                        if (sourcesFieldInfo != null)
+                        {
+                            var sources =
+                                sourcesFieldInfo.GetValue(
+                                    loadColumnAttribute);
+                            if (sources is List<TextLoader.Range> ranges)
+                                columnIndex = ranges.First().Min;
+                        }
+
+                        break;
+                }
+
+            if (propertyName == labelColumnName ||
+                columnName == labelColumnName) continue;
+            var feature = new Feature
+            {
+                PropertyName = propertyName,
+                ColumnName = columnName,
+                ColumnIndex = columnIndex
+            };
+            result.Add(feature);
+        }
+
+        // Iterate over each row
+        foreach (var row in dataEnumerable)
+        {
+        }
+
+        return result;
+    }
+
     /// <summary>
     ///     Converts an <see cref="IDataView" /> to a <see cref="DataTable" />.
     /// </summary>
@@ -206,7 +275,7 @@ public static class IDataViewExtensions
             if (x.Type is not VectorDataViewType vectorType) return x.Name;
             if (!vectorType.IsKnownSize)
                 throw new ArgumentException(
-                    "Data contains vector of unknown sizes are supported");
+                    "Data contains vector of unknown size");
 
             var columns = new string[vectorType.Size];
             for (var i = 1; i < vectorType.Size + 1; i++)
@@ -350,44 +419,6 @@ public static class IDataViewExtensions
         }
 
         File.WriteAllText(filePath, sb.ToString());
-    }
-
-    public static void OldWriteToCsv(
-        this IDataView dataView,
-        string filePath
-    )
-    {
-        var dt = dataView.ToDataTable();
-
-        var sb = new StringBuilder();
-
-        Debug.Assert(dt != null, nameof(dt) + " != null");
-        var columnNames = dt.Columns.Cast<DataColumn>()
-            .Select(column => column.ColumnName);
-        sb.AppendLine(string.Join(",", columnNames));
-
-        foreach (DataRow row in dt.Rows)
-        {
-            var fields =
-                row.ItemArray.Select(InvariantCultureString);
-            sb.AppendLine(string.Join(",", fields));
-        }
-
-        File.WriteAllText(filePath, sb.ToString());
-    }
-
-    private static string InvariantCultureString(object field)
-    {
-        var returnValue = field.GetType() switch
-        {
-            { } floatType when floatType == typeof(float) => ((float)field)
-                .ToString(CultureInfo.InvariantCulture),
-            { } doubleType when doubleType == typeof(double) => ((double)field)
-                .ToString(CultureInfo.InvariantCulture),
-            _ => field.ToString()
-        };
-
-        return returnValue;
     }
 
     /// <summary>

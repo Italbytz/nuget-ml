@@ -11,11 +11,15 @@ namespace Italbytz.ML;
 public static class ITransformerExtensions
 {
     /// <summary>
-    ///     Retrieves the model parameters from the given <see cref="ITransformer" />.
+    ///     Extracts an <see cref="IPredictionTransformer" /> from the given
+    ///     <see cref="ITransformer" />.
+    ///     Returns null if the transformer does not contain a prediction transformer.
     /// </summary>
-    /// <returns>The model parameters.</returns>
-    public static ICanSaveModel GetModelParameters(
-        this ITransformer transformer)
+    /// <returns>The extracted prediction transformer or null.</returns>
+    public static IPredictionTransformer<ICanSaveModel>?
+        ExtractIPredictionTransformer(
+            this ITransformer transformer)
+
     {
         IPredictionTransformer<ICanSaveModel>? predictionTransformer = null;
         switch (transformer)
@@ -38,8 +42,22 @@ public static class ITransformerExtensions
                 break;
         }
 
+        return predictionTransformer;
+    }
+
+    /// <summary>
+    ///     Retrieves the model parameters from the given <see cref="ITransformer" />.
+    /// </summary>
+    /// <returns>The model parameters.</returns>
+    public static ICanSaveModel GetModelParameters(
+        this ITransformer transformer)
+    {
+        var predictionTransformer =
+            transformer.ExtractIPredictionTransformer();
+
         var model = predictionTransformer.Model;
-        if (model is OneVersusAllModelParameters oneVersusAllModelParameters)
+        if (model is OneVersusAllModelParameters
+            oneVersusAllModelParameters)
             model = oneVersusAllModelParameters.ToPublic();
         return model;
     }
