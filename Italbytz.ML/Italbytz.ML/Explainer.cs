@@ -91,6 +91,8 @@ public class Explainer(
         var dataArray =
             mlContext.Data.CreateEnumerable<ModelInput>(data, true).ToArray();
 
+        // Create a header for the CSV output
+        sb.AppendLine("Feature, Score, Class");
 
         // Iterate over each row
         var scoreCount = 0;
@@ -116,32 +118,19 @@ public class Explainer(
                 if (scoreArray == null)
                     throw new InvalidOperationException(
                         "Prediction output does not contain a 'Score' property.");
-                if (scoreCount == 0)
-                {
-                    scoreCount = scoreArray.Length;
-                    // Create a header for the CSV output
-                    sb.AppendLine("Feature, " +
-                                  string.Join(", ",
-                                      Enumerable.Range(0, scoreCount)
-                                          .Select(i => $"Class{i}")));
-                }
+                if (scoreCount == 0) scoreCount = scoreArray.Length;
 
                 scores.Add(scoreArray);
             }
 
-            var line = new StringBuilder();
-            line.Append($"{gridValue.ToString(CultureInfo.InvariantCulture)}");
             for (var i = 0; i < scoreCount; i++)
             {
-                line.Append(", ");
                 var averageScore = scores
                     .Select(s => s[i])
                     .Average();
-                line.Append(
-                    $"{averageScore.ToString(CultureInfo.InvariantCulture)}");
+                sb.AppendLine(
+                    $"{gridValue.ToString(CultureInfo.InvariantCulture)}, {averageScore.ToString(CultureInfo.InvariantCulture)}, Class{i}");
             }
-
-            sb.AppendLine(line.ToString());
         }
 
         return sb.ToString();
