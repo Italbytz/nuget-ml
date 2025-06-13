@@ -22,24 +22,46 @@ namespace Italbytz.ML;
 /// </remarks>
 public static class IDataViewExtensions
 {
-    public static List<Feature> GetFeatures<ModelInput>(
+    /// <summary>
+    ///     Extracts a list of features from an <see cref="IDataView" /> based on the
+    ///     properties of the specified <typeparamref name="ModelInput" /> type.
+    ///     Features are identified by inspecting the properties of
+    ///     <typeparamref name="ModelInput" /> and their associated attributes.
+    ///     Numerical and categorical features are supported, and their value ranges
+    ///     are computed from the data.
+    ///     The label column is excluded from the resulting feature list.
+    /// </summary>
+    /// <typeparam name="ModelInput">
+    ///     The input model type representing the schema of the data. Must be a class
+    ///     with a parameterless constructor.
+    /// </typeparam>
+    /// <param name="labelColumnName">
+    ///     The name of the label column to exclude from the features. Defaults to
+    ///     <c>DefaultColumnNames.Label</c>.
+    /// </param>
+    /// <returns>
+    ///     A list of <see cref="IFeature" /> objects representing the features found
+    ///     in the data view, including their names, indices, and value ranges.
+    /// </returns>
+    public static List<IFeature> GetFeatures<ModelInput>(
         this IDataView dataView,
         string labelColumnName = DefaultColumnNames.Label)
         where ModelInput : class, new()
     {
-        var result = new List<Feature>();
+        var result = new List<IFeature>();
         var mlContext = ThreadSafeMLContext.LocalMLContext;
         var dataEnumerable =
             mlContext.Data.CreateEnumerable<ModelInput>(dataView, true);
 
-        var schema = dataView.Schema;
-        var firstRow = dataEnumerable.First();
+        var modelInputs = dataEnumerable.ToList();
+        var firstRow = modelInputs.First();
         const BindingFlags flags = BindingFlags.Public |
                                    BindingFlags.NonPublic |
                                    BindingFlags.Instance;
         var modelProperties = ReflectionHelper.GetPropertyInfo(firstRow, flags);
         foreach (var propertyInfo in modelProperties)
         {
+            var propertyType = propertyInfo.PropertyType;
             var propertyName = propertyInfo.Name;
             var columnName = propertyInfo.Name;
             var columnIndex = 0;
@@ -73,19 +95,51 @@ public static class IDataViewExtensions
 
             if (propertyName == labelColumnName ||
                 columnName == labelColumnName) continue;
-            var feature = new Feature
-            {
-                PropertyName = propertyName,
-                ColumnName = columnName,
-                ColumnIndex = columnIndex
-            };
-            result.Add(feature);
+            IFeature? feature = null;
+            if (ReferenceEquals(propertyType, typeof(float)))
+                feature = new NumericalFeature
+                {
+                    PropertyName = propertyName,
+                    ColumnName = columnName,
+                    ColumnIndex = columnIndex
+                };
+            else if (ReferenceEquals(propertyType, typeof(string)))
+                feature = new CategoricalFeature
+                {
+                    PropertyName = propertyName,
+                    ColumnName = columnName,
+                    ColumnIndex = columnIndex
+                };
+
+            if (feature != null) result.Add(feature);
         }
 
-        // Iterate over each row
-        foreach (var row in dataEnumerable)
-        {
-        }
+        foreach (var feature in result)
+            switch (feature)
+            {
+                case NumericalFeature numericalFeature:
+                {
+                    var column = dataView.GetColumn<float>(feature.ColumnName)
+                        .ToList();
+                    var min = column.Min();
+                    var max = column.Max();
+                    numericalFeature.ValueRange =
+                    [
+                        min,
+                        max
+                    ];
+                    break;
+                }
+                case CategoricalFeature categoricalFeature:
+                {
+                    var column = dataView.GetColumn<string>(feature.ColumnName)
+                        .ToList();
+                    categoricalFeature.ValueRange =
+                        column.Distinct().OrderBy(c => c).ToList();
+                    break;
+                }
+            }
+
 
         return result;
     }

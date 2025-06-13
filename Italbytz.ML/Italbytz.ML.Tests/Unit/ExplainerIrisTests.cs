@@ -69,11 +69,19 @@ public class ExplainerIrisTests
     [TestMethod]
     public void TestCeterisParibusScript()
     {
-        var script = _explainer
-            .GetCeterisParibusScript<IrisModelInput, IrisModelOutput>();
-        Assert.IsNotNull(script);
-        Assert.IsTrue(script.Length > 0);
-        // Additional checks can be added based on expected content of the script
+        for (var i = 0; i < 4; i++)
+        {
+            var script = _explainer
+                .GetCeterisParibusTable<IrisModelInput, IrisModelOutput>(i);
+
+            var tmpPath = Path.GetTempPath();
+            var tmpFile =
+                Path.Combine(tmpPath, $"iris_ceteris_paribus_{i}.csv");
+            File.WriteAllText(tmpFile, script);
+            Assert.IsNotNull(script);
+            Assert.IsTrue(script.Length > 0);
+            // Additional checks can be added based on expected content of the script
+        }
     }
 
     private class IrisModelInput

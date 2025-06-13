@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using Italbytz.ML.Data;
@@ -40,8 +41,9 @@ public class Explainer(
                     scoredDataView, labelColumnName, metric);
     }
 
-    public string GetCeterisParibusScript<ModelInput, ModelOutput>(
-        int featureIndex = 0) where ModelInput : class, new()
+    public string GetCeterisParibusTable<ModelInput, ModelOutput>(
+        int featureIndex = 0, int gridCells = 100)
+        where ModelInput : class, new()
         where ModelOutput : class, new()
     {
         if (scenario != ScenarioType.Classification)
@@ -61,73 +63,86 @@ public class Explainer(
                     model);
 
         var features = data.GetFeatures<ModelInput>(labelColumnName);
+        if (features == null || features.Count == 0)
+            throw new InvalidOperationException(
+                "No features found in the provided data. " +
+                "Ensure that the data contains valid features for Ceteris Paribus analysis.");
 
-        var dataEnumerable =
-            mlContext.Data.CreateEnumerable<ModelInput>(data, true);
+        var selectedFeature =
+            features.FirstOrDefault(f => f.ColumnIndex == featureIndex);
+        if (selectedFeature == null)
+            throw new ArgumentException(
+                $"No feature found with ColumnIndex {featureIndex}.",
+                nameof(featureIndex));
+
+        if (selectedFeature is not NumericalFeature numericalFeature)
+            throw new ArgumentException(
+                "Ceteris Paribus is currently only supported for numerical features.",
+                nameof(featureIndex));
+
+        // Generate grid values for the selected feature
+        var minValue = numericalFeature.ValueRange[0];
+        var maxValue = numericalFeature.ValueRange[1];
+        var step = (maxValue - minValue) / (gridCells - 1);
+        var gridValues = new float[gridCells];
+        for (var i = 0; i < gridCells; i++) gridValues[i] = minValue + i * step;
+
+
+        var dataArray =
+            mlContext.Data.CreateEnumerable<ModelInput>(data, true).ToArray();
+
 
         // Iterate over each row
-        foreach (var row in dataEnumerable)
+        foreach (var gridValue in gridValues)
         {
-            var flags = BindingFlags.Public | BindingFlags.NonPublic |
-                        BindingFlags.Instance;
-            foreach (var prop in GetPropertyValues(row, flags))
+            var scores = new List<float[]>();
+            var scoreCount = 0;
+            foreach (var row in dataArray)
             {
-                Console.Out.WriteLine(prop);
-                Console.Out.Flush();
+                // Create a copy of the row to modify
+                var modifiedRow = new ModelInput();
+                // Copy properties from the original row to the modified row
+                foreach (var prop in typeof(ModelInput).GetProperties(
+                             BindingFlags.Public | BindingFlags.Instance))
+                    if (prop.CanWrite)
+                        prop.SetValue(modifiedRow,
+                            prop.Name == selectedFeature.PropertyName
+                                ? gridValue
+                                : prop.GetValue(row));
+                var prediction = predictionEngine.Predict(modifiedRow);
+                var scoreProperty = prediction.GetType().GetProperty("Score");
+                var scoreArray = scoreProperty?.GetValue(prediction) as float[];
+                if (scoreArray == null)
+                    throw new InvalidOperationException(
+                        "Prediction output does not contain a 'Score' property.");
+                if (scoreCount == 0)
+                {
+                    scoreCount = scoreArray.Length;
+                    // Create a header for the CSV output
+                    sb.AppendLine("Feature, " +
+                                  string.Join(", ",
+                                      Enumerable.Range(0, scoreCount)
+                                          .Select(i => $"Class{i}")));
+                }
+
+                scores.Add(scoreArray);
             }
 
-            Console.Out.Flush();
-            var prediction = predictionEngine.Predict(row);
-            var debuggy = prediction;
-            var debug = row;
-            // Do something (print out Size property) with current Housing Data object being evaluated
-            Console.WriteLine(row);
-            Console.WriteLine(row);
-        }
-        /*
-        // Get DataViewSchema of IDataView
-        var columns = data.Schema;
-
-        // Create DataViewCursor
-        using (var cursor = data.GetRowCursor(columns))
-        {
-            // Define variables where extracted values will be stored to
-            float size = default;
-            VBuffer<float> historicalPrices = default;
-            float currentPrice = default;
-
-            // Define delegates for extracting values from columns
-            var sizeDelegate = cursor.GetGetter<float>(columns[0]);
-            var historicalPriceDelegate =
-                cursor.GetGetter<VBuffer<float>>(columns[1]);
-            var currentPriceDelegate = cursor.GetGetter<float>(columns[2]);
-
-            // Iterate over each row
-            while (cursor.MoveNext())
+            var line = new StringBuilder();
+            line.Append($"{gridValue.ToString(CultureInfo.InvariantCulture)}");
+            for (var i = 0; i < scoreCount; i++)
             {
-                //Get values from respective columns
-                sizeDelegate.Invoke(ref size);
-                historicalPriceDelegate.Invoke(ref historicalPrices);
-                currentPriceDelegate.Invoke(ref currentPrice);
+                line.Append(", ");
+                var averageScore = scores
+                    .Select(s => s[i])
+                    .Average();
+                line.Append(
+                    $"{averageScore.ToString(CultureInfo.InvariantCulture)}");
             }
-        }
-        */
-        //var dataExcerpt = dataView.GetDataExcerpt(labelColumnName);
 
-        sb.AppendLine(
-            "import pandas as pd\n" +
-            "import matplotlib.pyplot as plt\n" +
-            "from sklearn.inspection import plot_partial_dependence\n" +
-            "\n" +
-            "# Load the data\n" +
-            $"data = pd.DataFrame({data})\n" +
-            "\n" +
-            "# Plot Ceteris Paribus for feature at index " + featureIndex +
-            "\n" +
-            "fig, ax = plt.subplots(figsize=(10, 6))\n" +
-            $"plot_partial_dependence(model, data, features=[{featureIndex}], ax=ax)\n" +
-            "plt.title('Ceteris Paribus Plot')\n" +
-            "plt.show()");
+            sb.AppendLine(line.ToString());
+        }
+
         return sb.ToString();
     }
 

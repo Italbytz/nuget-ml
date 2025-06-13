@@ -1,6 +1,6 @@
 namespace Italbytz.ML.Data;
 
-public class Feature
+public interface IFeature
 {
     public string PropertyName { get; set; }
     public string ColumnName { get; set; }
