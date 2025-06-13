@@ -93,10 +93,11 @@ public class Explainer(
 
 
         // Iterate over each row
+        var scoreCount = 0;
         foreach (var gridValue in gridValues)
         {
             var scores = new List<float[]>();
-            var scoreCount = 0;
+
             foreach (var row in dataArray)
             {
                 // Create a copy of the row to modify
