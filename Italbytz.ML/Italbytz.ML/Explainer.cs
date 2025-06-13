@@ -92,7 +92,7 @@ public class Explainer(
             mlContext.Data.CreateEnumerable<ModelInput>(data, true).ToArray();
 
         // Create a header for the CSV output
-        sb.AppendLine("Feature, Score, Class");
+        sb.AppendLine("Feature,Score,Class");
 
         // Iterate over each row
         var scoreCount = 0;
@@ -129,7 +129,7 @@ public class Explainer(
                     .Select(s => s[i])
                     .Average();
                 sb.AppendLine(
-                    $"{gridValue.ToString(CultureInfo.InvariantCulture)}, {averageScore.ToString(CultureInfo.InvariantCulture)}, Class{i}");
+                    $"{gridValue.ToString(CultureInfo.InvariantCulture)},{averageScore.ToString(CultureInfo.InvariantCulture)},Class{i}");
             }
         }
 
