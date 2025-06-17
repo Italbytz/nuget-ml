@@ -29,6 +29,25 @@ public static class ConfusionMatrixExtensions
     }
 
     /// <summary>
+    ///     Calculates the macro-averaged F1 score across all classes in the given
+    ///     confusion matrix.
+    ///     This treats each class equally by averaging the F1 scores of all classes,
+    ///     regardless of their support.
+    /// </summary>
+    public static double F1Macro(this ConfusionMatrix matrix)
+    {
+        double f1Sum = 0;
+        var classCount = matrix.NumberOfClasses;
+
+        for (var i = 0; i < classCount; i++)
+            f1Sum += 2 * matrix.PerClassPrecision[i] *
+                     matrix.PerClassRecall[i] /
+                     (matrix.PerClassPrecision[i] + matrix.PerClassRecall[i]);
+
+        return f1Sum / classCount;
+    }
+
+    /// <summary>
     ///     Generates a Python script using scikit-learn and matplotlib to plot a
     ///     confusion matrix
     ///     based on the data contained in the given <see cref="ConfusionMatrix" />.
