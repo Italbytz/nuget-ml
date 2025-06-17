@@ -7,6 +7,17 @@ using Microsoft.ML;
 
 namespace Italbytz.ML;
 
+/// <summary>
+///     Provides methods for explaining machine learning models, such as generating
+///     permutation feature importance and Ceteris Paribus tables.
+/// </summary>
+/// <param name="model">The trained ML.NET model to be explained.</param>
+/// <param name="data">The data used for explanation and analysis.</param>
+/// <param name="scenario">The scenario type (e.g., Classification).</param>
+/// <param name="labelColumnName">
+///     The name of the label column (default:
+///     DefaultColumnNames.Label).
+/// </param>
 public class Explainer(
     ITransformer model,
     IDataView data,

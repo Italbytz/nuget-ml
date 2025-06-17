@@ -22,7 +22,7 @@ public class ExplainerIrisTests
         // Load the model
         var modelPath =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Models",
-                "iris.mlnet");
+                "iris_20250617102903_100_Model.mlnet");
         _irisModel = mlContext.Model.Load(modelPath, out _);
         // Load the raw data
         var dataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
