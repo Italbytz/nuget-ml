@@ -40,9 +40,16 @@ public static class ConfusionMatrixExtensions
         var classCount = matrix.NumberOfClasses;
 
         for (var i = 0; i < classCount; i++)
-            f1Sum += 2 * matrix.PerClassPrecision[i] *
-                     matrix.PerClassRecall[i] /
-                     (matrix.PerClassPrecision[i] + matrix.PerClassRecall[i]);
+        {
+            var dividend = matrix.PerClassPrecision[i] *
+                           matrix.PerClassRecall[i];
+            var divisor = matrix.PerClassPrecision[i] +
+                          matrix.PerClassRecall[i];
+            if (divisor == 0) continue;
+            // Calculate F1 score for class i
+            f1Sum += 2 * (dividend /
+                          divisor);
+        }
 
         return f1Sum / classCount;
     }

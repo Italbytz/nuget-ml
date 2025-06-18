@@ -23,4 +23,16 @@ public static class MulticlassClassificationMetricsExtensions
     {
         return metrics.ConfusionMatrix.F1ScoreBinary(positiveClassIndex);
     }
+
+    /// <summary>
+    ///     Calculates the macro-averaged F1 score across all classes in the given
+    ///     confusion matrix.
+    ///     This treats each class equally by averaging the F1 scores of all classes,
+    ///     regardless of their support.
+    /// </summary>
+    public static double F1Macro(
+        this MulticlassClassificationMetrics metrics)
+    {
+        return metrics.ConfusionMatrix.F1Macro();
+    }
 }
