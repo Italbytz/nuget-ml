@@ -6,11 +6,4 @@
 
 This package has been superseded by [`nuget-ai`](https://github.com/italbytz/nuget-ai).
 
-## See Also
-
-This package has been superseded by **[`nuget-foundation`](https://github.com/italbytz/nuget-foundation)**.
-
-
-
-
 This is the home of the NuGet library ```Italbytz.ML``` which provides helper classes for use with ```Microsoft.ML```
